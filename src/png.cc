@@ -98,3 +98,116 @@ void PNG::load(const string& name)
 	png_destroy_read_struct(&png,&info,0);
 	fclose(f);
 }
+
+void save_image_vector(int width, int height, const char * name, float* pixels)
+{
+	int i,d,j;
+	png_bytep row = NULL;
+	cout << "Taking Snapshot ";
+	FILE *fp = fopen(name, "wb");
+	png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	png_infop info = png_create_info_struct(png);
+	if (setjmp(png_jmpbuf(png))){
+		cout << "Error taking snapshot" << endl;
+	}
+	png_init_io(png, fp);
+	png_set_IHDR(
+		png,
+		info,
+		width, height,
+		8,
+		PNG_COLOR_TYPE_RGB,
+		PNG_INTERLACE_NONE,
+		PNG_COMPRESSION_TYPE_DEFAULT,
+		PNG_FILTER_TYPE_DEFAULT
+	);
+	png_write_info(png, info);
+	
+	row = (png_bytep) malloc(3 * width * sizeof(png_byte));
+	for (i=height-1; i>=0; i--) {
+		for (d=0;d<width*3;d++) {
+			row[d]=(int)(pixels[i*width*3+d]*255)%256;
+		}
+		png_write_row(png, row);
+	}
+	free(row);
+	png_write_end(png, NULL);
+	fclose(fp);
+	cout << "[\033[1;32mDone\033[0m]" << endl;
+}
+
+void save_image_vector_2(int width, int height, const char * name, unsigned char* pixels)
+{
+	int i,d,j;
+	png_bytep row = NULL;
+	cout << "Taking Snapshot ";
+	FILE *fp = fopen(name, "wb");
+	png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	png_infop info = png_create_info_struct(png);
+	if (setjmp(png_jmpbuf(png))){
+		cout << "Error taking snapshot" << endl;
+	}
+	png_init_io(png, fp);
+	png_set_IHDR(
+		png,
+		info,
+		width, height,
+		8,
+		PNG_COLOR_TYPE_RGB,
+		PNG_INTERLACE_NONE,
+		PNG_COMPRESSION_TYPE_DEFAULT,
+		PNG_FILTER_TYPE_DEFAULT
+	);
+	png_write_info(png, info);
+	
+	row = (png_bytep) malloc(3 * width * sizeof(png_byte));
+	for (i=height-1; i>=0; i--) {
+		for (d=0,j=0;d<width*3;d=d+3,j=j+4) {
+			row[d]=pixels[i*width*4+j];
+			row[d+1]=pixels[i*width*4+j+1];
+			row[d+2]=pixels[i*width*4+j+2];
+		}
+		png_write_row(png, row);
+	}
+	free(row);
+	png_write_end(png, NULL);
+	fclose(fp);
+	cout << "[\033[1;32mDone\033[0m]" << endl;
+}
+
+void save_image_vector_3(int width, int height, const char * name, unsigned char* pixels)
+{
+	int i,d,j;
+	png_bytep row = NULL;
+	cout << "Taking Snapshot ";
+	FILE *fp = fopen(name, "wb");
+	png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	png_infop info = png_create_info_struct(png);
+	if (setjmp(png_jmpbuf(png))){
+		cout << "Error taking snapshot" << endl;
+	}
+	png_init_io(png, fp);
+	png_set_IHDR(
+		png,
+		info,
+		width, height,
+		8,
+		PNG_COLOR_TYPE_RGB,
+		PNG_INTERLACE_NONE,
+		PNG_COMPRESSION_TYPE_DEFAULT,
+		PNG_FILTER_TYPE_DEFAULT
+	);
+	png_write_info(png, info);
+	
+	row = (png_bytep) malloc(3 * width * sizeof(png_byte));
+	for (i=height-1; i>=0; i--) {
+		for (d=0;d<width*3;d++) {
+			row[d]=pixels[i*width*3+d];
+		}
+		png_write_row(png, row);
+	}
+	free(row);
+	png_write_end(png, NULL);
+	fclose(fp);
+	cout << "[\033[1;32mDone\033[0m]" << endl;
+}

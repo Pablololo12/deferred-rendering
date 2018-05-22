@@ -6,7 +6,7 @@ extern float world_ro;
 
 extern bool world_fill;
 
-void world_init();
-void world_reshape(int w,int h);
-void world_display(int w,int h);
+void world_init(int,int);
+void world_reshape(int,int);
+void world_display(int,int);
 void world_clean();

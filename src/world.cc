@@ -23,6 +23,7 @@
 #include "world.h"
 #include "obj.h"
 #include "png.h"
+#include "ray_casting.h"
 
 using namespace std;
 
@@ -38,19 +39,17 @@ GLuint tex;
 GLuint ten;
 
 glm::mat4	view;
-glm::vec3   light_pos;
-glm::vec3   light_color;
-glm::vec3	obj_color;
-glm::vec4	dasr;
 
-GLuint		view_loc_frag;
-GLuint light_loc_frag;
-GLuint light_color_frag;
-GLuint camera_loc_frag;
-GLuint obj_color_loc_frag;
-GLuint das_frag;
+GLuint view_loc_frag;
 GLuint textures_loc;
-const GLint samplers[2] = {0,1};
+
+GLuint gBuffer;
+GLuint gPosition;
+GLuint gNormal;
+GLuint gAlbedoSpec;
+// - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+const GLint samplers[1] = {0};
 
 void glcheck(const string& msg)
 {
@@ -94,12 +93,12 @@ string get_shader(string filename)
 	return buffer.str();
 }
 
-OBJ obj;
+static OBJ obj;
 
-void world_init()
+void world_init(int width, int height)
 {
 	cout << "Initializing Buffers ";
-	glm::mat4 xf = glm::rotate(glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
+	glm::mat4 xf = glm::rotate(glm::radians(90.0f),glm::vec3(5.0f,0.0f,0.0f));
 
 //	obj.load("./model/cube.obj");
 	obj.load("./model/teapot.obj",xf);
@@ -132,6 +131,54 @@ void world_init()
 	glBufferData(GL_ARRAY_BUFFER,vao_sz*sizeof(glm::vec3),obj.normals().data(),GL_STATIC_DRAW);
 	glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,sizeof(glm::vec3),NULL);
 
+	GLuint vtc = 0;
+	glGenBuffers(1,&vtc);
+	glBindBuffer(GL_ARRAY_BUFFER,vtc);
+	glBufferData(GL_ARRAY_BUFFER,vao_sz*sizeof(glm::vec3),obj.texcoord().data(),GL_STATIC_DRAW);
+	glVertexAttribPointer(2,3,GL_FLOAT,GL_FALSE,sizeof(glm::vec3),NULL);
+
+//	PNG textura("./tex/checker.png");
+//	PNG textura("./tex/paper.png");
+	PNG textura("./tex/lava.png");
+	glGenTextures(1,&tex);
+	glBindTexture(GL_TEXTURE_2D,tex);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGB32F,textura.width(),textura.height(),0,GL_RGB,GL_FLOAT,textura.pixels().data());
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);//GL_LINEAR
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);//GL_LINEAR_MIPMAP_LINEAR
+
+
+	glGenFramebuffers(1, &gBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	  
+	// - position buffer
+	glGenTextures(1, &gPosition);
+	glBindTexture(GL_TEXTURE_2D, gPosition);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+	  
+	// - normal buffer
+	glGenTextures(1, &gNormal);
+	glBindTexture(GL_TEXTURE_2D, gNormal);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+
+	// - Albedo and specular
+	glGenTextures(1, &gAlbedoSpec);
+	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+
+	glDrawBuffers(3, attachments);
+
 	const char * tmp;
 	// Shader en fragmento
 	string f_vertex_src = get_shader("shaders/vertex_shader.vert");
@@ -152,16 +199,8 @@ void world_init()
 	glLinkProgram(prog_frag);
 
 	view_loc_frag = glGetUniformLocation(prog_frag,"view");
-	light_loc_frag = glGetUniformLocation(prog_frag,"light_pos");
-	light_color_frag = glGetUniformLocation(prog_frag,"light_color");
-	camera_loc_frag = glGetUniformLocation(prog_frag,"camera");
-	obj_color_loc_frag = glGetUniformLocation(prog_frag,"obj_color");
-	das_frag = glGetUniformLocation(prog_frag,"dasr");
+	textures_loc = glGetUniformLocation(prog_frag, "textur");
 
-	light_pos = {0.0,1.0,0.0};
-	light_color = {2.0,2.0,2.0};
-	obj_color = {1.0,1.0,1.0};
-	dasr = {0.7,0.0,0.3,1.0};
 
 	glClearColor(0,0,0,0);
 	cout << "[\033[1;32mDone\033[0m]" << endl;
@@ -169,13 +208,13 @@ void world_init()
 
 void world_reshape(int w,int h)
 {
-//	cout << w << " x " << h << endl;
 	glViewport(0,0,w,h);
 }
 
 
-float world_ph=0;
-float world_th=0;
+//float world_ph=1.57;
+float world_ph=1.0;
+float world_th=0.5;
 float world_ro=2;
 
 bool world_fill=true;
@@ -202,26 +241,43 @@ void world_display(int w,int h)
 	view = pers*camera;
 
 	glPolygonMode(GL_FRONT_AND_BACK,(world_fill ? GL_FILL : GL_LINE));
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_MULTISAMPLE);
+	//glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_MULTISAMPLE);
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 
 	glUseProgram(prog_frag);
-	glUniform3fv(camera_loc_frag,1, glm::value_ptr(cam));
-	glUniform3fv(light_loc_frag,1, glm::value_ptr(cam));
-	glUniform3fv(light_color_frag,1, glm::value_ptr(light_color));
-	glUniform3fv(obj_color_loc_frag,1, glm::value_ptr(obj_color));
-	glUniform4fv(das_frag,1, glm::value_ptr(dasr));
 	glUniformMatrix4fv(view_loc_frag,1,GL_FALSE,glm::value_ptr(view));
-
 
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D,tex);
+	glUniform1iv(textures_loc , 1, samplers);
+
 	glDrawArrays(GL_TRIANGLES,0,obj.faces().size());
 	cout << "[\033[1;32mDone\033[0m]" << endl;
+
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	float* positions = new float[3 * w * h];
+	glReadPixels(0, 0, w, h, GL_RGB, GL_FLOAT, positions);
+	save_image_vector(w, h, "position.png", positions);
+
+	glReadBuffer(GL_COLOR_ATTACHMENT1);
+	float* normals = new float[3 * w * h];
+	glReadPixels(0, 0, w, h, GL_RGB, GL_FLOAT, normals);
+	save_image_vector(w, h, "normals.png", normals);
+
+	glReadBuffer(GL_COLOR_ATTACHMENT2);
+	unsigned char* albedo = new unsigned char[4 * w * h];
+	glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, albedo);
+	save_image_vector_2(w, h, "albedo.png", albedo);
+
+	ray_cast(obj, positions, normals, albedo, w, h, cam);
 }
 
 void world_clean()
