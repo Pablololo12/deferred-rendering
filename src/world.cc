@@ -67,14 +67,14 @@ GLuint depthRenderBuffer;
 GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
 const GLint samplers[1] = {0};
 
-static std::vector<glm::vec3> square={{-1.0,-1.0,0.0},
+static std::vector<glm::vec3> square {{-1.0,-1.0,0.0},
 									{1.0,-1.0,0.0},
 									{1.0,1.0,0.0},
 									{-1.0,1.0,0.0},
 									{1.0,1.0,0.0},
 									{-1.0,-1.0,0.0}};
 
-static std::vector<glm::vec3> squareUV={{0.0,0.0,0.0},
+static std::vector<glm::vec3> squareUV {{0.0,0.0,0.0},
 								{1.0,0.0,0.0},
 								{1.0,1.0,0.0},
 								{0.0,1.0,0.0},
@@ -205,7 +205,6 @@ void world_init(int width, int height)
 
 	glGenFramebuffers(1, &gBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	glcheck("66");
 	  
 	// - position buffer
 	glGenTextures(1, &gPosition);
@@ -248,38 +247,32 @@ void world_init(int width, int height)
 	tmp = f_vertex_src.c_str();
 	glShaderSource(svtx_frag,1,&tmp,NULL);
 	glCompileShader(svtx_frag);
-	glcheck("35");
 
 	sfrg_frag = glCreateShader(GL_FRAGMENT_SHADER);
 	tmp = f_fragment_src.c_str();
 	glShaderSource(sfrg_frag,1,&tmp,NULL);
 	glCompileShader(sfrg_frag);
-	glcheck("30");
 
 	prog_frag = glCreateProgram();
 	glAttachShader(prog_frag,svtx_frag);
 	glAttachShader(prog_frag,sfrg_frag);
 	glLinkProgram(prog_frag);
-	glcheck("20");
 
 	string f_fragment_2_src = get_shader("shaders/fragment_raster_shader.frag");
 	sfrg2_frag = glCreateShader(GL_FRAGMENT_SHADER);
 	tmp = f_fragment_2_src.c_str();
 	glShaderSource(sfrg2_frag,1,&tmp,NULL);
 	glCompileShader(sfrg2_frag);
-	glcheck("6");
 
 	svtx2_frag = glCreateShader(GL_VERTEX_SHADER);
 	tmp = f_vertex_src.c_str();
 	glShaderSource(svtx2_frag,1,&tmp,NULL);
 	glCompileShader(svtx2_frag);
-	glcheck("35");
 
 	prog_rast_frag = glCreateProgram();
 	glAttachShader(prog_rast_frag,svtx2_frag);
 	glAttachShader(prog_rast_frag,sfrg2_frag);
 	glLinkProgram(prog_rast_frag);
-	glcheck("2");
 
 	string simple_vertex_src = get_shader("shaders/vertex_simple.vert");
 	string simple_fragment_src = get_shader("shaders/fragment_simple.frag");
@@ -288,33 +281,28 @@ void world_init(int width, int height)
 	tmp = simple_vertex_src.c_str();
 	glShaderSource(simple_vert,1,&tmp,NULL);
 	glCompileShader(simple_vert);
-	glcheck("35");
 
 	simple_frag = glCreateShader(GL_FRAGMENT_SHADER);
 	tmp = simple_fragment_src.c_str();
 	glShaderSource(simple_frag,1,&tmp,NULL);
 	glCompileShader(simple_frag);
-	glcheck("30");
 
 	prog_simple = glCreateProgram();
 	glAttachShader(prog_simple,simple_vert);
 	glAttachShader(prog_simple,simple_frag);
 	glLinkProgram(prog_simple);
-	glcheck("2033");
 
 	view_loc_frag = glGetUniformLocation(prog_frag, "view");
 	textures_loc = glGetUniformLocation(prog_frag, "textur");
-	glcheck("11");
 
 	view_loc2_frag = glGetUniformLocation(prog_rast_frag, "view");
 	textures_loc2 = glGetUniformLocation(prog_rast_frag, "textur");
 	light_pos_frag = glGetUniformLocation(prog_rast_frag, "light_pos");
 	camera_frag = glGetUniformLocation(prog_rast_frag, "camera");
 	light_color_frag = glGetUniformLocation(prog_rast_frag, "light_color");
-	glcheck("47");
 
 	simple_texture_loc = glGetUniformLocation(prog_simple, "textur");
-	glcheck("26asdasd");
+	glcheck("Location");
 
 
 	glClearColor(0.0,0.0,0.0,0.0);
@@ -441,8 +429,8 @@ void world_display(int w,int h, int option, int take_screenshot)
 		glUniform1iv(simple_texture_loc , 1, samplers);
 
 		glDrawArrays(GL_TRIANGLES,0,square.size());
-		glcheck("jope");
-		
+		glcheck("Draw Square");
+
 		glDeleteTextures(1,&tex2);
 		delete final;
 	}

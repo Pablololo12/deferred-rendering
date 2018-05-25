@@ -40,7 +40,7 @@ int init_openGL()
 	glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT,GL_TRUE);
 
-	vector<int> vers = { 46,45,44,43,42,41,40,33 };
+	vector<int> vers { 46,45,44,43,42,41,40,33 };
 	for (auto v : vers)
 	{
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,v/10);
@@ -105,6 +105,11 @@ void setWindowFPS (GLFWwindow* win)
 	 double fps = double(nbFrames) / delta;
 
 	 std::stringstream ss;
+	 if (ray_casting==0) {
+	 	ss << "Raster";
+	 } else {
+	 	ss << "Deferred";
+	 }
 	 ss << " [" << fps << " FPS]";
 
 	 glfwSetWindowTitle(win, ss.str().c_str());

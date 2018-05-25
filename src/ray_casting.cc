@@ -18,7 +18,7 @@ glm::vec3 apply_color(glm::vec3 position, glm::vec3 normal,
 {
 	// A por la luz
 	glm::vec3 vector_luz = glm::normalize(light_pos-position);
-	glm::vec3 position2 = position + normal*EPSILON*2;
+	glm::vec3 position2 = position + normal*EPSILON;
 	float distance;
 	int ind = get_triangle(vector_luz,position2,&distance);
 
