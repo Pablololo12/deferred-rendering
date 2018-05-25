@@ -4,13 +4,24 @@
 #include <png.h>
 #include <cstdlib>
 #include <iostream>
+#include <cmath>
+#include <sstream>
 
 using namespace std;
 
-int width = 500;
-int height = 500;
+int width = 1000;
+int height = 1000;
 bool rotate_o=false;
+int ray_casting = 0;
+int take_screenshot = 0;
 GLFWwindow* win;
+
+void ogl_info(GLFWwindow* win);
+void ogl_reshape(GLFWwindow* win,int width,int height);
+void ogl_display(GLFWwindow* win);
+void setWindowFPS (GLFWwindow* win);
+
+void keyboard(GLFWwindow* win,int key,int s,int act,int mod);
 
 void ogl_info(GLFWwindow* win)
 {
@@ -54,9 +65,124 @@ int main(int argc, char **argv)
 	if(init_openGL()==0) return 0;
 
 	world_init(width, height);
-	
+
+	glfwSetFramebufferSizeCallback(win,ogl_reshape);
+	glfwSetWindowRefreshCallback(win,ogl_display);
 	glfwMakeContextCurrent(win);
-	world_display(width,height);
+	glfwSetWindowRefreshCallback(win,ogl_display);
+	glfwSetKeyCallback(win,keyboard);
+
+	ogl_display(win);
+	//world_display(width,height);
+	while (!glfwWindowShouldClose(win))
+	{
+		if(!rotate_o){
+			glfwWaitEvents();
+		}
+		else {
+			glfwWaitEventsTimeout(0.016667); // 60 FPS
+			world_ph += 0.01;
+			ogl_display(win);
+		}
+		setWindowFPS(win);
+	}
+
+	glfwTerminate();
+
 
 	return 0;
+}
+
+void setWindowFPS (GLFWwindow* win)
+{
+	static int nbFrames = 0;
+	static int lastTime = 0;
+	double currentTime = glfwGetTime();
+	double delta = currentTime - lastTime;
+	nbFrames++;
+	if ( delta >= 1.0 ){
+
+	 double fps = double(nbFrames) / delta;
+
+	 std::stringstream ss;
+	 ss << " [" << fps << " FPS]";
+
+	 glfwSetWindowTitle(win, ss.str().c_str());
+
+	 nbFrames = 0;
+	 lastTime = currentTime;
+	}
+}
+
+void ogl_reshape(GLFWwindow* win,int w,int h)
+{
+	glfwMakeContextCurrent(win);
+	width = w;
+	height = h;
+
+	world_reshape(w,h);
+}
+
+void ogl_display(GLFWwindow* win)
+{
+	int w,h;
+	glfwGetWindowSize(win,&w,&h);
+
+	glfwMakeContextCurrent(win);
+
+	world_display(w,h,ray_casting,take_screenshot);
+	take_screenshot = 0;
+
+	glfwSwapBuffers(win);
+}
+
+void keyboard(GLFWwindow* win,int key,int s,int act,int mod)
+{
+	if (act==GLFW_RELEASE)
+		return;
+
+	switch (key)
+	{
+		case GLFW_KEY_Q:
+		case GLFW_KEY_ESCAPE:
+			glfwSetWindowShouldClose(win,GL_TRUE);
+			break;
+		case GLFW_KEY_LEFT:
+			world_ph += 0.1;
+			break;
+		case GLFW_KEY_RIGHT:
+			world_ph -= 0.1;
+			break;
+		case GLFW_KEY_DOWN:
+			world_th += 0.1;
+			if (world_th>0.49*M_PI)
+				world_th = 0.49*M_PI;
+			break;
+		case GLFW_KEY_UP:
+			world_th -= 0.1;
+			if (world_th<-0.49*M_PI)
+				world_th = -0.49*M_PI;
+			break;
+		case GLFW_KEY_R:
+			world_ph = 0;
+			world_th = 0;
+			break;
+		case GLFW_KEY_F:
+			world_fill = !world_fill;
+			break;
+		case GLFW_KEY_P:
+			rotate_o = !rotate_o;
+			break;
+		case GLFW_KEY_S:
+			ray_casting = !ray_casting;
+			break;
+		case GLFW_KEY_W:
+			take_screenshot = 1;
+			break;
+		default:
+			cout << "key " << key << "<" << char(key) << ">" << endl;
+			break;
+	}
+
+	ogl_display(win);
 }

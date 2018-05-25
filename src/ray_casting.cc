@@ -9,7 +9,7 @@
 using namespace std;
 
 glm::vec3 light_pos;
-glm::vec3 light_pw = {0.03,0.03,0.03};
+glm::vec3 light_pw = {0.02,0.02,0.02};
 static OBJ obj;
 float EPSILON = 0.00001;
 
@@ -17,9 +17,10 @@ glm::vec3 apply_color(glm::vec3 position, glm::vec3 normal,
 				glm::vec3 difuse, char specular, glm::vec3 cam)
 {
 	// A por la luz
-	glm::vec3 vector_luz = light_pos-position;
+	glm::vec3 vector_luz = glm::normalize(light_pos-position);
+	glm::vec3 position2 = position + normal*EPSILON*2;
 	float distance;
-	int ind = get_triangle(glm::normalize(vector_luz),position,&distance);
+	int ind = get_triangle(vector_luz,position2,&distance);
 
 	if (ind != -1) {
 		return {0,0,0};
@@ -55,15 +56,14 @@ glm::vec3 apply_color(glm::vec3 position, glm::vec3 normal,
 	rgb.g = color_luz.g * (difuse.g + especular) / M_PI * dotproductIntegral;
 	rgb.b = color_luz.b * (difuse.b + especular) / M_PI * dotproductIntegral;
 
-	return glm::clamp(rgb)*255;;
+	return glm::clamp(rgb)*255;
 }
 
 
-void ray_cast(OBJ object, float* positions, float* normals, unsigned char* albedo,
+unsigned char* ray_cast(OBJ object, float* positions, float* normals, unsigned char* albedo,
 				int width, int height, glm::vec3 cam)
 {
 	obj = object;
-	cout << obj.faces().size()/3 << endl;
 	light_pos = cam;
 	unsigned char* final = new unsigned char[3 * width * height];
 
@@ -71,7 +71,7 @@ void ray_cast(OBJ object, float* positions, float* normals, unsigned char* albed
 		for (int d=0,j=0; d<width*3; d=d+3, j=j+4) {
 			int x = i*width*3+d;
 			int x2 = i*width*4+j;
-			glm::vec3 color = {0.0,0.0,0.0};
+			glm::vec3 color = {0,0,0};
 			glm::vec3 position = {positions[x],positions[x+1],positions[x+2]};
 			if(position.x != 0.0 || position.y != 0.0 || position.z != 0.0) {
 				glm::vec3 normal = {normals[x],normals[x+1],normals[x+2]};
@@ -84,7 +84,7 @@ void ray_cast(OBJ object, float* positions, float* normals, unsigned char* albed
 			final[x+2] = color.b;
 		}
 	}
-	save_image_vector_3(width, height, "final.png", final);
+	return final;
 }
 
 float toca_triangulo(glm::vec3 origen, glm::vec3 vec, glm::vec3 V1, glm::vec3 V2, glm::vec3 V3)
