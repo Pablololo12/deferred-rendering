@@ -130,8 +130,8 @@ void world_init(int width, int height)
 	
 	glm::mat4 xf = glm::rotate(glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
 
-	obj.load("./model/teapot.obj",xf);
-	//obj.load("./model/cube.obj",xf);
+	obj.load("./model/teapot2.obj",xf);
+	//obj.load("./model/venus.obj",xf);
 
 	cout << obj.faces().size()/3 << endl;
 	cout << "Initializing Buffers ";

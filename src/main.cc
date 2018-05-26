@@ -9,8 +9,8 @@
 
 using namespace std;
 
-int width = 1000;
-int height = 1000;
+int width = 500;
+int height = 500;
 bool rotate_o=false;
 int ray_casting = 0;
 int take_screenshot = 0;
@@ -40,7 +40,7 @@ int init_openGL()
 	glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT,GL_TRUE);
 
-	vector<int> vers { 46,45,44,43,42,41,40,33 };
+	vector<int> vers { 42,41,40,33 };
 	for (auto v : vers)
 	{
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,v/10);

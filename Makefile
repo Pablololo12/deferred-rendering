@@ -1,7 +1,7 @@
 TARGET = ogl
 
-FLAGS = -O3 -march=native -std=c++14 -DTEXTURES
-LIBS = -lglfw -framework OpenGL -lpng
+FLAGS = -O3 -march=native -std=c++14 -DTEXTURES -fopenmp
+LIBS = -lglfw -framework OpenGL -lpng -fopenmp
 CC = g++
 LD = g++
 LDFLAGS =

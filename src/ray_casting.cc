@@ -5,6 +5,7 @@
 #include "obj.h"
 #include "png.h"
 #include <iostream>
+#include <omp.h>
 
 using namespace std;
 
@@ -67,6 +68,7 @@ unsigned char* ray_cast(OBJ object, float* positions, float* normals, unsigned c
 	light_pos = cam;
 	unsigned char* final = new unsigned char[3 * width * height];
 
+	#pragma omp parallel for
 	for (int i=0; i<height; i++) {
 		for (int d=0,j=0; d<width*3; d=d+3, j=j+4) {
 			int x = i*width*3+d;
