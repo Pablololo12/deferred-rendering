@@ -22,7 +22,7 @@ void ogl_display(GLFWwindow* win);
 void setWindowFPS (GLFWwindow* win);
 
 void keyboard(GLFWwindow* win,int key,int s,int act,int mod);
-
+void scroll(GLFWwindow* win,double x,double y);
 void ogl_info(GLFWwindow* win)
 {
 
@@ -71,6 +71,7 @@ int main(int argc, char **argv)
 	glfwMakeContextCurrent(win);
 	glfwSetWindowRefreshCallback(win,ogl_display);
 	glfwSetKeyCallback(win,keyboard);
+	glfwSetScrollCallback(win,scroll);
 
 	ogl_display(win);
 	//world_display(width,height);
@@ -188,6 +189,16 @@ void keyboard(GLFWwindow* win,int key,int s,int act,int mod)
 			cout << "key " << key << "<" << char(key) << ">" << endl;
 			break;
 	}
+
+	ogl_display(win);
+}
+
+void scroll(GLFWwindow* win,double,double z)
+{
+	if (z<0)
+		world_ro *= 0.90;
+	else
+		world_ro *= 1.10;
 
 	ogl_display(win);
 }

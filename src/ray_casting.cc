@@ -12,7 +12,7 @@ using namespace std;
 glm::vec3 light_pos;
 glm::vec3 light_pw = {0.02,0.02,0.02};
 static OBJ obj;
-float EPSILON = 0.00001;
+float EPSILON = 0.000001;
 
 glm::vec3 apply_color(glm::vec3 position, glm::vec3 normal,
 				glm::vec3 difuse, char specular, glm::vec3 cam)

@@ -80,6 +80,9 @@ static std::vector<glm::vec3> squareUV {{0.0,0.0,0.0},
 								{0.0,1.0,0.0},
 								{1.0,1.0,0.0},
 								{0.0,0.0,0.0}};
+float* positions;
+float* normals;
+unsigned char* albedo;
 
 void glcheck(const string& msg)
 {
@@ -127,11 +130,14 @@ static OBJ obj;
 
 void world_init(int width, int height)
 {
+	positions = new float[3 * width * height];
+	normals = new float[3 * width * height];
+	albedo = new unsigned char[4 * width * height];
 	
 	glm::mat4 xf = glm::rotate(glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
 
-	obj.load("./model/teapot2.obj",xf);
-	//obj.load("./model/venus.obj",xf);
+	//obj.load("./model/teapot2.obj",xf);
+	obj.load("./model/Handgun_obj.obj",xf);
 
 	cout << obj.faces().size()/3 << endl;
 	cout << "Initializing Buffers ";
@@ -183,10 +189,10 @@ void world_init(int width, int height)
 
 
 
-//	PNG textura("./tex/checker.png");
+	PNG textura("./tex/handgun_C.png");
 //	PNG textura("./tex/paper.png");
 //	PNG textura("./tex/lava.png");
-	PNG textura("./tex/wood.png");
+//	PNG textura("./tex/wood.png");
 
 	glGenTextures(1,&tex);
 	glBindTexture(GL_TEXTURE_2D,tex);
@@ -386,15 +392,12 @@ void world_display(int w,int h, int option, int take_screenshot)
 
 	if (option == 1) {
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
-		float* positions = new float[3 * w * h];
 		glReadPixels(0, 0, w, h, GL_RGB, GL_FLOAT, positions);
 
 		glReadBuffer(GL_COLOR_ATTACHMENT1);
-		float* normals = new float[3 * w * h];
 		glReadPixels(0, 0, w, h, GL_RGB, GL_FLOAT, normals);
 
 		glReadBuffer(GL_COLOR_ATTACHMENT2);
-		unsigned char* albedo = new unsigned char[4 * w * h];
 		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, albedo);
 
 		unsigned char * final = ray_cast(obj, positions, normals, albedo, w, h, cam);
