@@ -136,8 +136,7 @@ void world_init(int width, int height)
 	
 	glm::mat4 xf = glm::rotate(glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
 
-	//obj.load("./model/teapot2.obj",xf);
-	obj.load("./model/Handgun_obj.obj",xf);
+	obj.load("./model/teapot2.obj",xf);
 
 	cout << obj.faces().size()/3 << endl;
 	cout << "Initializing Buffers ";
@@ -189,10 +188,9 @@ void world_init(int width, int height)
 
 
 
-	PNG textura("./tex/handgun_C.png");
 //	PNG textura("./tex/paper.png");
 //	PNG textura("./tex/lava.png");
-//	PNG textura("./tex/wood.png");
+	PNG textura("./tex/wood.png");
 
 	glGenTextures(1,&tex);
 	glBindTexture(GL_TEXTURE_2D,tex);
@@ -240,8 +238,6 @@ void world_init(int width, int height)
 	glcheck("Albedo Buffer");
 	glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 	glcheck("Atach");
-
-	//glDrawBuffers(3, attachments);
 
 	const char * tmp;
 	// Shader en fragmento
@@ -312,7 +308,6 @@ void world_init(int width, int height)
 
 
 	glClearColor(0.0,0.0,0.0,0.0);
-	//glClearDepth(0.0f);
 	cout << "[\033[1;32mDone\033[0m]" << endl;
 }
 
@@ -355,7 +350,7 @@ void world_display(int w,int h, int option, int take_screenshot)
 	glPolygonMode(GL_FRONT_AND_BACK,(world_fill ? GL_FILL : GL_LINE));
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	//glEnable(GL_MULTISAMPLE);
+	glEnable(GL_MULTISAMPLE);
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
