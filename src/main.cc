@@ -14,6 +14,7 @@ int height = 500;
 bool rotate_o=false;
 int ray_casting = 0;
 int take_screenshot = 0;
+int ray_reflected = 0;
 GLFWwindow* win;
 
 void ogl_info(GLFWwindow* win);
@@ -136,7 +137,7 @@ void ogl_display(GLFWwindow* win)
 
 	glfwMakeContextCurrent(win);
 
-	world_display(w,h,ray_casting,take_screenshot);
+	world_display(w,h,ray_casting,take_screenshot, ray_reflected);
 	take_screenshot = 0;
 
 	glfwSwapBuffers(win);
@@ -184,6 +185,9 @@ void keyboard(GLFWwindow* win,int key,int s,int act,int mod)
 			break;
 		case GLFW_KEY_W:
 			take_screenshot = 1;
+			break;
+		case GLFW_KEY_E:
+			ray_reflected = !ray_reflected;
 			break;
 		default:
 			cout << "key " << key << "<" << char(key) << ">" << endl;

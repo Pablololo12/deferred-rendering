@@ -83,6 +83,7 @@ static std::vector<glm::vec3> squareUV {{0.0,0.0,0.0},
 float* positions;
 float* normals;
 unsigned char* albedo;
+PNG textura;
 
 void glcheck(const string& msg)
 {
@@ -136,7 +137,7 @@ void world_init(int width, int height)
 	
 	glm::mat4 xf = glm::rotate(glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
 
-	obj.load("./model/teapot2.obj",xf);
+	obj.load("./model/teapot4.obj",xf);
 
 	cout << obj.faces().size()/3 << endl;
 	cout << "Initializing Buffers ";
@@ -190,7 +191,7 @@ void world_init(int width, int height)
 
 //	PNG textura("./tex/paper.png");
 //	PNG textura("./tex/lava.png");
-	PNG textura("./tex/wood.png");
+	textura.load("./tex/wood.png");
 
 	glGenTextures(1,&tex);
 	glBindTexture(GL_TEXTURE_2D,tex);
@@ -243,7 +244,6 @@ void world_init(int width, int height)
 	// Shader en fragmento
 	string f_vertex_src = get_shader("shaders/vertex_shader.vert");
 	string f_fragment_src = get_shader("shaders/fragment_shader.frag");
-	glcheck("Really?");
 
 	svtx_frag = glCreateShader(GL_VERTEX_SHADER);
 	tmp = f_vertex_src.c_str();
@@ -324,9 +324,9 @@ float world_ro=2;
 
 bool world_fill=true;
 
-glm::vec3 light_color = {3.5,3.5,3.5};
+glm::vec3 light_color = {0.3,0.3,0.3};
 
-void world_display(int w,int h, int option, int take_screenshot)
+void world_display(int w,int h, int option, int take_screenshot, int ray_reflected)
 {
 	//cout << "Creating image ";
 	if (h<=0) return;
@@ -395,7 +395,7 @@ void world_display(int w,int h, int option, int take_screenshot)
 		glReadBuffer(GL_COLOR_ATTACHMENT2);
 		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, albedo);
 
-		unsigned char * final = ray_cast(obj, positions, normals, albedo, w, h, cam);
+		unsigned char * final = ray_cast(obj, textura, positions, normals, albedo, w, h, cam, ray_reflected);
 
 		if (take_screenshot==1) {
 			save_image_vector(w, h, "position.png", positions);
