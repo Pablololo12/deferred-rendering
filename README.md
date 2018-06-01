@@ -9,3 +9,4 @@ Controls:
 	* W - to take snapshot
 	* P - start rotating
 	* Q - to exit
+	* Scroll - zoom
