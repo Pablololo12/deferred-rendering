@@ -1,4 +1,8 @@
 #version 330 core
+/*
+ * Fragment shader for deferred
+ */
+
 uniform sampler2D textur[1];
 in vec3 pos;
 in vec3 norm;

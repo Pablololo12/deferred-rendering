@@ -75,14 +75,13 @@ int main(int argc, char **argv)
 	glfwSetScrollCallback(win,scroll);
 
 	ogl_display(win);
-	//world_display(width,height);
 	while (!glfwWindowShouldClose(win))
 	{
 		if(!rotate_o){
 			glfwWaitEvents();
 		}
 		else {
-			glfwWaitEventsTimeout(0.016667); // 60 FPS
+			glfwWaitEventsTimeout(0.015);
 			world_ph += 0.01;
 			ogl_display(win);
 		}
@@ -95,6 +94,7 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+// Function to show info on the window title
 void setWindowFPS (GLFWwindow* win)
 {
 	static int nbFrames = 0;
@@ -177,16 +177,16 @@ void keyboard(GLFWwindow* win,int key,int s,int act,int mod)
 		case GLFW_KEY_F:
 			world_fill = !world_fill;
 			break;
-		case GLFW_KEY_P:
+		case GLFW_KEY_P: // P for animation
 			rotate_o = !rotate_o;
 			break;
-		case GLFW_KEY_S:
+		case GLFW_KEY_S: // Press S to use ray tracing
 			ray_casting = !ray_casting;
 			break;
-		case GLFW_KEY_W:
+		case GLFW_KEY_W: // W for screenshot
 			take_screenshot = 1;
 			break;
-		case GLFW_KEY_E:
+		case GLFW_KEY_E: // E to trace refkected
 			ray_reflected = !ray_reflected;
 			break;
 		default:

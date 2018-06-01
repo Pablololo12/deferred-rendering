@@ -1,4 +1,7 @@
 #version 330 core
+/*
+ * Fragment shader for raster
+ */
 
 out vec4 color;
 
@@ -28,7 +31,6 @@ void main()
 	vec3 difs = dot_l*l_power*obj_color*light_color; //Kd(N*L)Cd
 	vec3 amb = obj_color*light_color; //ka Cd Cl
 	vec3 spe = dot_l*pow(dot(specular_dir,vec_v),2.0)*obj_color*light_color*l_power; //ks (N*L)(R*V)Cs Cl
-	//color = vec4(1.0,1.0,1.0,1.0);
 
 	color = vec4(difs*0.95 + amb*0.0 + spe*0.05, 1.0);
 }
